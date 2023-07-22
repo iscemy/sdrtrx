@@ -5,8 +5,8 @@ class FFTW : public IFFT
 private:
     /* data */
     //currently all operations done in internal buffers, extra copying is done, maybe optimize this in future
-    fftwf_complex *inBuffer, *outBuffer;
-    fftwf_plan forwardPlan, backwardPlan;
+    fftw_complex *inBuffer, *outBuffer;
+    fftw_plan forwardPlan, backwardPlan;
     int planComplexNumberSize;
 public:
     void DoForwardFFT(ComplexArray &input, ComplexArray &output);

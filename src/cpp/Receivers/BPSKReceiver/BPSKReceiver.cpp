@@ -126,7 +126,7 @@ void BPSKReceiver::mainThread() {
                     for(auto &received_byte : output) {
                         printf("%x ", received_byte);
                     }
-                    printf("\n");
+                    printf("\n"); 
                 } else {
                     printf("ins paket kesildigindendir\n");
                     // GetCurrentProcessingBuffer()->PrintContentsForPython();
