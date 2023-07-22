@@ -93,7 +93,7 @@ void BPSKReceiver::mainThread() {
 
         int numberOfIndices = indices.size();
 
-        if(indices.back().second > (baseband.GetElementSize()*0.99f)) {
+        if(indices.back().second > (GetCurrentProcessingBuffer()->GetElementSize()*0.99f)) {
             numberOfIndices--;
             samplesLeftFromPreviousProcessing = baseband.GetElementSize() - indices.back().first + 50 * 20;
             indices.erase(indices.end());
@@ -128,11 +128,11 @@ void BPSKReceiver::mainThread() {
                     }
                     printf("\n"); 
                 } else {
-                    printf("ins paket kesildigindendir\n");
-                    // GetCurrentProcessingBuffer()->PrintContentsForPython();
-                    // partialProcessBuffer.PrintContentsForPython();
-                    // baseband.PrintContentsForPython();
-                    // pReceiveBuffer->PrintContentsForPython();
+                    printf("ins paket kesildigindendir %f\n", recoveredFreqCoarse);
+                    GetCurrentProcessingBuffer()->PrintContentsForPython();
+                    partialProcessBuffer.PrintContentsForPython();
+                    baseband.PrintContentsForPython();
+                    pReceiveBuffer->PrintContentsForPython();
                 }
 
             }
@@ -141,7 +141,11 @@ void BPSKReceiver::mainThread() {
             indices_partial.clear();
         }
         t1 = duration_cast< milliseconds >(system_clock::now().time_since_epoch());
+        #ifdef BUILDX86
         printf("t1 - t0 %ldms\n", (t1.count()-t0.count()));
+        #else
+        printf("t1 - t0 %lldms\n", (t1.count()-t0.count()));
+        #endif
         SwapBuffers();
         indices.clear();
     }
