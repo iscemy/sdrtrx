@@ -27,7 +27,11 @@ int main(int, char**){
     setbuf(stdout, 0);
     // float fs = 1e6, f0 = 50e3;
     // TestRadioUDP tudp_tx("127.0.0.1", 1234, "127.0.0.2", 1235);
+    #ifdef BUILDX86
     TestRadioUDP tudp_rx("127.0.0.2", 1235, "127.0.0.1", 1234);
+    #else
+    TestRadioUDP tudp_rx("10.0.1.10", 1235, "10.0.1.1", 1234);
+    #endif
     BPSKReceiver bpsk_rx(&tudp_rx);
 
     // TestRadioFile tr("/home/cem//received_data0.npy");
