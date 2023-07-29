@@ -22,6 +22,10 @@ private:
     bool isBufferOwnedByThis = false;
     bool isBufferInited = false;
 
+    std::complex<float> maxValBeforeNormalize = 0;
+    std::complex<float> minValBeforeNormalize = 0;
+    std::complex<float> avarageBeforNormalize = 0;
+
     // static bool ComplexCompare(const std::complex<float> &a, const std::complex<float> &b) {
     //     if(abs(a) < abs(b))
     //         return true;
@@ -116,9 +120,13 @@ std::complex<float> *buffer, *ptemp;
 
     int GetMaxPos();
     int GetMinPos();
+
+    float GetMaxValAbs();
+    float GetMinValAbs();
     ComplexArray GetSorted();
     void Sort();
     void Normalize();
+    void Normalize(float &minVal, float &maxVal);
     void GetNonZeroIndexes(std::vector<std::pair<int,int>> &indices, int slack = 0);
     void ScaleWith(float scalar);
     std::vector<std::pair<std::complex<float>, int>> SortWithIndexes();

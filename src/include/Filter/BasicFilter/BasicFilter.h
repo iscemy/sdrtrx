@@ -16,7 +16,7 @@ bandpass, lowpass, notch, -> child classes
 */
     BasicFilter(IConvolve *pConvolve);
     void SetFilterTaps(ComplexArray &taps);
-    void RunFilter(ComplexArray &input, ComplexArray &output);
+    void RunFilter(ComplexArray &input, ComplexArray &output, bool fixFirOffset = false);
     int GetOutputSize(int inputSize);
 
 private:

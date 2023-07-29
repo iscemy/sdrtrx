@@ -109,6 +109,8 @@ bool TimeRecBrute::ValidateBuffer(ComplexArray &input, int inputOffset, int inpu
         return false;
     }
     numOfBits = numOfBytes * 8;
+    if(numOfBytes > 70) // todo parametric
+        return false;
     Sampler(input, sampledTemp, sampleLatencyIndex + oversampleFactor * (phyHeaderSizeInBits + phyPreambleSizeInBits + numOfBits),
       phyTrailerSizeInBits * oversampleFactor, samplerError);
 

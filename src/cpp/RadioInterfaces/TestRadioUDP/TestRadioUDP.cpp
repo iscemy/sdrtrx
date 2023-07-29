@@ -18,9 +18,9 @@ int TestRadioUDP::Receive(ComplexArray &data) {
         LOG2CONSOLE("receive size err ");
     }
     //to not change the buffers size.
-    if((ret/((int)sizeof(float))) > data.GetElementSize()) {
-        ret = data.GetElementSize() * sizeof(float);
-    }
+    // if((ret/((int)sizeof(float))) > data.GetElementSize()) {
+    //     ret = data.GetElementSize() * sizeof(float);
+    // }
     data.SetBufferReal((float*)receiveBuffer, ret/sizeof(float));
     return ret;
 }

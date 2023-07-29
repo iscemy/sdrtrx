@@ -3,7 +3,7 @@
 FFTFreqRecovery::FFTFreqRecovery(IFFT *fft) {
     this->pFFT = fft;
 }
-
+//todo add windowing
 float FFTFreqRecovery::processBuffer(ComplexArray &Array, float f0, float df0, float &freq, float fs) {
     ComplexArray inputInF(Array.GetElementSize());
     pFFT->DoForwardFFT(Array, inputInF);

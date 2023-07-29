@@ -27,9 +27,11 @@ add_executable(modem src/main.cpp
             
 include_directories("src/include")
 target_compile_options(modem PUBLIC -Wall -Wextra -Wpedantic -Werror )
-target_compile_options(modem PUBLIC -O0)
+target_compile_options(modem PUBLIC -O3)
 
 target_link_libraries(modem fftw3)
+
+# add_definitions(-DLOG_ENABLE)
 
 if(COMPILE_TO_PC)
     add_definitions( -DBUILDX86)   

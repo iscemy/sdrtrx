@@ -9,7 +9,7 @@ BasicModulator::BasicModulator(float fsHz, float filterFreqHz, float filterBWHz)
 
 void BasicModulator::RunAlgorithm(ComplexArray &interfreq, ComplexArray &carrier, ComplexArray &baseband){ 
     ComplexArray temp = carrier * interfreq;
-    pFilter->RunFilter(temp, baseband);
+    pFilter->RunFilter(temp, baseband, true);
 }
 
 void BasicModulator::ChangeParameters(float fsHz, float filterFreqHz, float filterBWHz){ 

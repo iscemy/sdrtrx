@@ -1,6 +1,6 @@
 #include "RadioInterfaces/Pluto/Pluto.h"
 #include "Utilities/log.h"
-
+#ifdef PLUTO
 struct iio_context *Pluto::ctx = nullptr;
 struct iio_channel *Pluto::rx0_i = nullptr;
 struct iio_channel *Pluto::rx0_q = nullptr;
@@ -225,3 +225,4 @@ int Pluto::InitializeDevice() {
     return 0;
 }
 
+#endif

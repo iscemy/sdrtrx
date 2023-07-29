@@ -61,7 +61,7 @@ int SquarePreprocess::DoPreprocess(IConvolve *pConvolve, ComplexArray &input, Co
     for(int i = offset; i < output.GetElementSize() - offset; i++) {
         output[i] = output[i+offset];
     }
-    output.SetSize(output.GetElementSize() - offset);
+    output.SetSize(output.GetElementSize() - 2 * offset);
     return 0;
 }
 

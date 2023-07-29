@@ -6,9 +6,10 @@
 #include "CarrierRecovery/PLLPhaseFreq/DualPll/DuallPll.h"
 #include "Modulator/BasicModulator/BasicModulator.h"
 #include "Samplers/SamplerBrute/SamplerBrute.h"
-
+#include "Filter/BasicFilter/BasicFilter.h"
+#include "Utilities/log.h"
 #include "vector"
-#include <chrono>
+// #include <chrono>
 
 using namespace std::chrono;
 
@@ -26,167 +27,162 @@ BPSKReceiver::BPSKReceiver(IRadio *pRadio) {
 
 void BPSKReceiver::mainThread() {
     float fs = 1e6, f0 = 70e3;
+    float maxReceivedAbsVal, minReceivedAbsVal, recoveredFreqCoarse;
     int resultingSize;
     
     SquarePreprocess sqrpreprocess(fs, f0, 200);
     BasicConvolve conv;
-    
-    intermediateFreqSignal0.LateInit(intermediateFreqSignalSize);
-    intermediateFreqSignal1.LateInit(intermediateFreqSignalSize);
-    moduleReceiveBuffer.LateInit(intermediateFreqSignalSize);
-    partialProcessBuffer.LateInit(intermediateFreqSignalSize);
 
-    zeroBuffer.LateInit(zeroBufferSize);
-
-    for(int i = 0; i < zeroBufferSize; i++) {
-        zeroBuffer[i] = 0;
-    }
+    BasicFilter highPassFilter(&conv);
+    ComplexArray filtertaps(lowPassFilterSize);
+    filtertaps.SetBufferReal(lowPassFilterTaps, lowPassFilterSize);
+    highPassFilter.SetFilterTaps(filtertaps);
 
     resultingSize = sqrpreprocess.GetOutputSize(intermediateFreqSignalSize);
     FFTW fft(resultingSize * 2);
     FFTFreqRecovery fftrec(&fft);
     ComplexArray rp(resultingSize), carrierRecovered(resultingSize);
 
-    float recoveredFreqCoarse;
     DualPll pllRecoverer(fs, f0);
     BasicModulator downconvert(fs, 0, 4e4);
     ComplexArray baseband(downconvert.getOuputSize(resultingSize));
 
     std::vector<int> pattern = {-1,1,-1,1,-1,1,-1,1};
-    TimeRecBrute sampler(30, pattern);
-    std::vector<int> output;
-    std::vector<std::pair<int,int>> indices;
-    std::vector<std::pair<int,int>> indices_partial;
-
-    SetCurrentProcessingBuffer(&intermediateFreqSignal0);
-    SetCurrentReceiveBuffer(&moduleReceiveBuffer);
-    SetPreviousProcessingBuffer(&intermediateFreqSignal1);
-
+    TimeRecBrute sampler(oversampleFactor, pattern);
     int samplesLeftFromPreviousProcessing = 0;
-    milliseconds t0, t1;
+
+    receiveBuffer.LateInit(intermediateFreqSignalSize);
+    processBuffer.LateInit(intermediateFreqSignalSize);
+    highPassFiltered.LateInit(intermediateFreqSignalSize);
+    bool firstRun = true;
+    std::vector<std::pair<int,int>> indices, indices_baseband;
+    std::vector<int> output;
+
+    ComplexArray partialProcessBuffer(intermediateFreqSignalSize);
 
     while(1) {
-        ComplexArray *pProcessCurrent = GetCurrentProcessingBuffer();
-        ComplexArray *pProcessPrev = GetPreviousProcessingBuffer();
-        ComplexArray *pReceiveBuffer = GetCurrentReceiveBuffer();
-        pReceiveBuffer->SetSize(intermediateFreqSignalSize);
 
-        pRadio->Receive(*pReceiveBuffer);
-
+        pRadio->Receive(receiveBuffer);
         t0 = duration_cast< milliseconds >(system_clock::now().time_since_epoch());
+        receiveBuffer.SetAllImaginaryTo(0);
 
-        pReceiveBuffer->SetAllImaginaryTo(0);   
-        pReceiveBuffer->Normalize();
+        receiveBuffer.Normalize(minReceivedAbsVal, maxReceivedAbsVal);
+        // float minMaxRatio = ((float)maxReceivedAbsVal) /((float)minReceivedAbsVal);
 
-        if(samplesLeftFromPreviousProcessing > 0) {
-            //copying left over and newly received buffer to current process buffer 
-            pProcessCurrent->PartialCopyTwoArrays(*pProcessPrev, pProcessPrev->GetElementSize() - samplesLeftFromPreviousProcessing, samplesLeftFromPreviousProcessing,
-                                                    *pReceiveBuffer, 0, pReceiveBuffer->GetElementSize());
-            // pProcessCurrent->PrintContentsForPython();
+        // printf("tdiff %lld \n", t1.count() - t0.count());
+        if((maxReceivedAbsVal < receiverNoiseFloor)) {
+            PrintCycleTime();
+            continue;
+        }
+        // printf("samplesLeftFromPreviousProcessing %d \n",samplesLeftFromPreviousProcessing);
+
+        if(!firstRun) {
+            int offset = receiveBufferPrev.GetElementSize() - intermediateFreqSignalSize * 0.05 - samplesLeftFromPreviousProcessing;
+            if(offset < 0)
+                offset = 0;
+            processBuffer.PartialCopyTwoArrays(receiveBufferPrev, offset,
+                                        intermediateFreqSignalSize * 0.05 + samplesLeftFromPreviousProcessing,
+                                        receiveBuffer, 0, receiveBuffer.GetElementSize());
         } else {
-            //swapping receive and process buffer
-            SetCurrentProcessingBuffer(pReceiveBuffer);
-            SetCurrentReceiveBuffer(pProcessCurrent);
+            processBuffer = receiveBuffer;
+            firstRun = false;
         }
 
-        GetCurrentProcessingBuffer()->GetNonZeroIndexes(indices, 200);
+        highPassFilter.RunFilter(processBuffer, highPassFiltered);
+        
+        volatile float receivedMaxVal = receiveBuffer.GetMaxValAbs();
+        volatile float filteredMaxVal = highPassFiltered.GetMaxValAbs();
+
+        if(filteredMaxVal / receivedMaxVal < 0.5) { //todo more solid value
+            receiveBufferPrev = receiveBuffer;
+            PrintCycleTime();
+            continue;
+        }
+        
+        highPassFiltered.GetNonZeroIndexes(indices, 200);
+
+        checkIndicesForInvalidOnes(indices);
 
         int numberOfIndices = indices.size();
 
-        if(indices.back().second > (GetCurrentProcessingBuffer()->GetElementSize()*0.99f)) {
-            numberOfIndices--;
-            samplesLeftFromPreviousProcessing = baseband.GetElementSize() - indices.back().first + 50 * 20;
-            indices.erase(indices.end());
+        if(numberOfIndices > 0) {
+            if(indices.back().second > (highPassFiltered.GetElementSize()*0.95f)) {
+                numberOfIndices--;
+                samplesLeftFromPreviousProcessing = highPassFiltered.GetElementSize() - indices.back().first + 50 * 20;
+                indices.erase(indices.end());
+            } else {
+                samplesLeftFromPreviousProcessing = 0;
+            }
         } else {
-            samplesLeftFromPreviousProcessing = 0;
+            receiveBufferPrev = receiveBuffer;
+            PrintCycleTime();
+            continue;
         }
-
 
         for(std::pair<int, int> index : indices) {
-            partialProcessBuffer.CopyFromAnotherArray(*GetCurrentProcessingBuffer(), index.first, index.second - index.first);
+            partialProcessBuffer.CopyFromAnotherArray(highPassFiltered, index.first, index.second - index.first);
             sqrpreprocess.DoPreprocess(&conv, partialProcessBuffer, rp);
-            rp.ScaleWith(400.0);
-            // rp.GetNonZeroIndexes(indices);
-            // rp.PrintContentsForPython();
-            fftrec.processBuffer(rp, f0, 10e3, recoveredFreqCoarse, fs);
+            rp.ScaleWith(600.0);
+
+            // fftrec.processBuffer(rp, f0, 10e3, recoveredFreqCoarse, fs); //add windowing function
+            recoveredFreqCoarse = 70e3; 
             pllRecoverer.RunAlgorithm(rp, carrierRecovered, recoveredFreqCoarse);
-            // carrierRecovered.PrintContentsForPython();
-            ComplexArray carrierRecovered_offseted(carrierRecovered, 100);
-            downconvert.RunAlgorithm(partialProcessBuffer, carrierRecovered_offseted, baseband);
+
+            downconvert.RunAlgorithm(partialProcessBuffer, carrierRecovered, baseband);
             baseband.Normalize();
-            baseband.GetNonZeroIndexes(indices_partial);
+            
+            baseband.GetNonZeroIndexes(indices_baseband, oversampleFactor);
+            
 
-            // baseband.PrintContentsForPython();
+            for(size_t i = 0; i < indices_baseband.size(); i++){
+                    int bytes = sampler.RunAlgorithm(baseband, output, indices_baseband[i].first, indices_baseband[i].second - indices_baseband[i].first);
+                    if(bytes > 0) {
+                        // printf("birkac byte aldik hatasiz \n");
+                        for(auto &received_byte : output) {
+                            printf("%x ", received_byte);
+                        }
+                        printf("\n"); 
+                    } else {
+                        printf("ins paket kesildigindendir %f %d\n", recoveredFreqCoarse, indices_baseband[i].first);
 
-
-            for(size_t i = 0; i < indices_partial.size(); i++){
-                int bytes = sampler.RunAlgorithm(baseband, output, indices_partial[i].first, indices_partial[i].second - indices_partial[i].first);
-                if(bytes > 0) {
-                    // printf("birkac byte aldik hatasiz \n");
-                    for(auto &received_byte : output) {
-                        printf("%x ", received_byte);
+                        
+                        // baseband.PrintContentsForPython();
+                        // rp.PrintContentsForPython();
+                        // partialProcessBuffer.PrintContentsForPython();
+                        // carrierRecovered.PrintContentsForPython();
+                        
+                        // baseband.PrintContentsForPython();
+                        // pReceiveBuffer->PrintContentsForPython();
                     }
-                    printf("\n"); 
-                } else {
-                    printf("ins paket kesildigindendir %f\n", recoveredFreqCoarse);
-                    GetCurrentProcessingBuffer()->PrintContentsForPython();
-                    partialProcessBuffer.PrintContentsForPython();
-                    baseband.PrintContentsForPython();
-                    pReceiveBuffer->PrintContentsForPython();
-                }
 
             }
-            
-            
-            indices_partial.clear();
-        }
-        t1 = duration_cast< milliseconds >(system_clock::now().time_since_epoch());
-        #ifdef BUILDX86
-        printf("t1 - t0 %ldms\n", (t1.count()-t0.count()));
-        #else
-        printf("t1 - t0 %lldms\n", (t1.count()-t0.count()));
-        #endif
-        SwapBuffers();
+
+            indices_baseband.clear();
+
+        }   
+
+
+
+        receiveBufferPrev = receiveBuffer;
         indices.clear();
+        PrintCycleTime();
     }
 }
 
-// void BPSKReceiver::ProcessFrame(ComplexArray &input, std::vector<uint8_t> &output, int inputOffest, int inputSize) {
+void BPSKReceiver::checkIndicesForInvalidOnes(std::vector<std::pair<int,int>> indices) {
+    for(auto &index : indices) {
+        if(index.first < 10) {
+            LOG2CONSOLE("indices not looks right");
+        }
+    }
 
-// }
-
-// void BPSKReceiver::ProcessFrame(ComplexArray &input, ComplexArray &preprocessed, std::vector<uint8_t> &output, int inputOffest, int inputSize) {
-
-// }
-
-ComplexArray * BPSKReceiver::GetCurrentProcessingBuffer() {
-    return CurrentProcessBuffer;
 }
 
-ComplexArray * BPSKReceiver::GetPreviousProcessingBuffer() {
-    return PreviousProcessBuffer;
-}
+void BPSKReceiver::PrintCycleTime() {
+    t1 = duration_cast< milliseconds >(system_clock::now().time_since_epoch());
+    long long int tdiffms = (t1 - t0).count();
+    if(tdiffms > 8) {
 
-ComplexArray *BPSKReceiver::GetCurrentReceiveBuffer() {
-    return ReceiveBuffer;
-}
-
-void BPSKReceiver::SetCurrentProcessingBuffer(ComplexArray *buffer) {
-    CurrentProcessBuffer = buffer;
-}
-
-void BPSKReceiver::SetPreviousProcessingBuffer(ComplexArray *buffer) {
-    PreviousProcessBuffer = buffer;
-}
-
-void BPSKReceiver::SetCurrentReceiveBuffer(ComplexArray *buffer) {
-    ReceiveBuffer = buffer;
-}
-
-void BPSKReceiver::SwapBuffers() {
-    ComplexArray *tmp;
-    tmp = CurrentProcessBuffer;
-    CurrentProcessBuffer = PreviousProcessBuffer;
-    PreviousProcessBuffer = tmp;
-
+    }
+    
 }

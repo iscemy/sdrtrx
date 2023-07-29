@@ -25,7 +25,7 @@ using namespace std;
 
 //TODO:optimize ComplexArray assignment operations
 #define USE_HARDWARE
-
+// #undef USE_HARDWARE
 
 int main(int, char**){
     setbuf(stdout, 0);
@@ -43,12 +43,12 @@ int main(int, char**){
 
 #ifdef BUILDX86
     TestRadioUDP tudp_rx("127.0.0.2", 1235, "127.0.0.1", 1234);
-    pRadio = &pRadio;
+    pRadio = &tudp_rx;
 #else
     #ifdef USE_HARDWARE
         Pluto *pluto = Pluto::GetInstance();
-        pluto->SetRxParameters(433.7e6, 1e6, 1e6, 13);
-        pluto->SetTxParameters(433.7e6, 1e6, 1e6, 13);
+        pluto->SetRxParameters(433.7e6, 1e6, 1e6, 10);
+        pluto->SetTxParameters(433.7e6, 1e6, 1e6, 10);
         pluto->InitializeDevice();
         pRadio = pluto;
     #else

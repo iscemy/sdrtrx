@@ -229,6 +229,14 @@ int ComplexArray::GetMinPos() {
     return result;
 }
 
+float ComplexArray::GetMaxValAbs() {
+    return std::abs(buffer[GetMaxPos()]);
+}
+
+float ComplexArray::GetMinValAbs() {
+    return std::abs(buffer[GetMinPos()]);
+}
+
 void ComplexArray::SwapHalfs() {
     std::copy(buffer + size / 2, buffer + size, ptemp);
     std::copy(buffer, buffer + size / 2, buffer + size / 2);
@@ -269,12 +277,22 @@ void ComplexArray::SetAllImaginaryTo(float imag) {
 }
 
 void ComplexArray::Normalize() {
-    std::complex<float> maxval = buffer[GetMaxPos()];
-    std::complex<float> minval = buffer[GetMinPos()];
+    float max, min;
+    Normalize(min, max);
+}
+
+void ComplexArray::Normalize(float &minAbs, float &maxAbs) {
+    maxValBeforeNormalize = buffer[GetMaxPos()];
+    minValBeforeNormalize = buffer[GetMinPos()];
+    avarageBeforNormalize = std::complex<float>(0,0);
+    maxAbs = std::abs(maxValBeforeNormalize);
+    minAbs = std::abs(minValBeforeNormalize);
     for(int i = 0; i < size; i++) {
-        buffer[i] = buffer[i] / (maxval - minval);
+        avarageBeforNormalize += buffer[i] / ((float)size);
+        buffer[i] = buffer[i] / std::abs(maxValBeforeNormalize - minValBeforeNormalize) * 2.0f;
     }
 }
+
 
 void ComplexArray::ScaleWith(float scalar) {
     for(int i = 0; i < size; i++) {
@@ -285,23 +303,28 @@ void ComplexArray::ScaleWith(float scalar) {
 void ComplexArray::GetNonZeroIndexes(std::vector<std::pair<int,int>> &indices, int slack) {
     float absval;
     bool isNonZeroStart = false;
-    int indexStart = 0, zeroCounter = 40;
+    int indexStart = 0, zeroCounter = 0, oneCounter = 0;
 
 
-    float treshold = GetMeanAbs() * 0.8f;
+    float treshold = GetMaxValAbs() * 0.5;
+    // float treshold = 0.65;
 
     for(int i = 0; i < size; i++) {
         absval = abs(buffer[i]);
-        if((absval < treshold) && (absval > -treshold)) {
+        if(absval < treshold) {
             zeroCounter++;
-            if(isNonZeroStart && (zeroCounter > 120)) {
+            oneCounter = 0;
+            if(isNonZeroStart && (zeroCounter > 50)) {
                 indices.push_back(std::pair<int, int>(indexStart, i));
                 isNonZeroStart = false;
             }
         } else {
             zeroCounter = 0;
-            if(!isNonZeroStart) {
+            oneCounter++;
+            if((oneCounter > 0) && (!isNonZeroStart)) {
                 indexStart = i;
+                if(indexStart < 0) 
+                    indexStart = 0;
                 isNonZeroStart = true;
             }
         }
