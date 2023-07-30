@@ -90,8 +90,8 @@ void BPSKReceiver::mainThread() {
 
         highPassFilter.RunFilter(processBuffer, highPassFiltered);
         
-        volatile float receivedMaxVal = receiveBuffer.GetMaxValAbs();
-        volatile float filteredMaxVal = highPassFiltered.GetMaxValAbs();
+        volatile float receivedMaxVal = receiveBuffer.GetMeanAbs();
+        volatile float filteredMaxVal = highPassFiltered.GetMeanAbs();
 
         if(filteredMaxVal / receivedMaxVal < 0.5) { //todo more solid value
             receiveBufferPrev = receiveBuffer;

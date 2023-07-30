@@ -1,90 +1,93 @@
-#include "Math/ComplexArray/ComplexArray.h"
-#include "algorithm"
+#include "Math/RealArray/RealArray.h"
 
-void ComplexArray::CreateBuffers(int size) {
-    buffer = new std::complex<float>[size];
-    ptemp = new std::complex<float>[size];
+#include "Math/RealArray/RealArray.h"
+#include "algorithm"
+#include "cstring"
+
+void RealArray::CreateBuffers(int size) {
+    buffer = new float[size];
+    ptemp = new float[size];
     this->size = size;
     this->currentBuffersElementSize = size;
     isBufferOwnedByThis = true;
     isBufferInited = true;
 }
 
-ComplexArray::ComplexArray() {
+RealArray::RealArray() {
     isBufferOwnedByThis = false;
     isBufferInited = false;
 }
 
-ComplexArray::ComplexArray(int size)
+RealArray::RealArray(int size)
 {
     CreateBuffers(size);
 }
 
-ComplexArray::ComplexArray(const ComplexArray & ca) {
+RealArray::RealArray(const RealArray & ca) {
     CreateBuffers(ca.size);
     std::copy(ca.buffer, ca.buffer + ca.size, buffer);
 }
 
-ComplexArray::ComplexArray(const ComplexArray & ca, int offset) {
+RealArray::RealArray(const RealArray & ca, int offset) {
     CreateBuffers(ca.size - offset);
     std::copy(ca.buffer, ca.buffer  + ca.size - offset, buffer);
 }
 
-int ComplexArray::LateInit(int size) {
+int RealArray::LateInit(int size) {
     CreateBuffers(size);
     return 0;
 }
 
-ComplexArray& ComplexArray::operator*=(const ComplexArray& rhs) {
+RealArray& RealArray::operator*=(const RealArray& rhs) {
     for(int i = 0; i < size; i++) {
         this->buffer[i] *= rhs.buffer[i];
     }
     return *this;
 }
 
-ComplexArray& ComplexArray::operator/=(const ComplexArray& rhs) {
+RealArray& RealArray::operator/=(const RealArray& rhs) {
     for(int i = 0; i < size; i++) {
         this->buffer[i] /= rhs.buffer[i];
     }
     return *this;
 }
 
-ComplexArray& ComplexArray::operator+=(const ComplexArray& rhs) {
+RealArray& RealArray::operator+=(const RealArray& rhs) {
     for(int i = 0; i < size; i++) {
         this->buffer[i] += rhs.buffer[i];
     }
     return *this;
 }
 
-ComplexArray& ComplexArray::operator-=(const ComplexArray& rhs) {
+RealArray& RealArray::operator-=(const RealArray& rhs) {
     for(int i = 0; i < size; i++) {
         this->buffer[i] -= rhs.buffer[i];
     }
     return *this;
 }
 
-ComplexArray ComplexArray::operator*(const ComplexArray& rhs){
-    ComplexArray result(*this);
+RealArray RealArray::operator*(const RealArray& rhs){
+    RealArray result(*this);
     result *= rhs;
     return result;
 }
-ComplexArray ComplexArray::operator/(const ComplexArray& rhs){
-    ComplexArray result(*this);
+RealArray RealArray::operator/(const RealArray& rhs){
+    RealArray result(*this);
     result /= rhs;
     return result;
 }
-ComplexArray ComplexArray::operator+(const ComplexArray& rhs){
-    ComplexArray result(*this);
+RealArray RealArray::operator+(const RealArray& rhs){
+    RealArray result(*this);
     result += rhs;
     return result;
 }
-ComplexArray ComplexArray::operator-(const ComplexArray& rhs){
-    ComplexArray result(*this);
+RealArray RealArray::operator-(const RealArray& rhs){
+    RealArray result(*this);
     result -= rhs;
     return result;
 }
 
-ComplexArray& ComplexArray::operator=(ComplexArray& rhs) {
+RealArray& RealArray::operator=(RealArray& rhs) {
     if(this == &rhs) 
         return *this;
     if(!isBufferInited)
@@ -96,7 +99,7 @@ ComplexArray& ComplexArray::operator=(ComplexArray& rhs) {
     return *this;
 }
 
-void ComplexArray::operator=(const ComplexArray& rhs) {
+void RealArray::operator=(const RealArray& rhs) {
     if(this == &rhs) 
         return;
 
@@ -108,183 +111,136 @@ void ComplexArray::operator=(const ComplexArray& rhs) {
     std::copy(rhs.buffer, rhs.buffer + rhs.size, buffer);
 }
 
-std::complex<float> & ComplexArray::operator[](int index) {
+float & RealArray::operator[](int index) {
     return buffer[index];
 }
 
-void ComplexArray::ConjugateThis() {
-    for(int i = 0; i < size; i++) {
-        buffer[i] = conj(buffer[i]);
-    }
-}
 
-ComplexArray ComplexArray::GetConjugate() {
-    ComplexArray result(size);
-    for(int i = 0; i < size; i++) {
-        result.buffer[i] = conj(this->buffer[i]);
-    }
-    return result;
-}
-
-ComplexArray::~ComplexArray()
+RealArray::~RealArray()
 {
-    if (isBufferOwnedByThis && isBufferInited)
+    if (isBufferOwnedByThis && isBufferInited){
         delete buffer;
+        delete ptemp;    
+    }
 }
 
-void ComplexArray::SetBuffer(int16_t *start, int inputSize, int step) {
+void RealArray::SetBuffer(int16_t *start, int inputSize, int step) {
     HandleBufferSize(inputSize);
     for(int i = 0; i < inputSize; i++) {
-        buffer[i] = std::complex<float>(start[step*i], start[step*i+1]);
+        buffer[i] = start[step*i];
     }
 }
 
-void ComplexArray::SetBuffer(float *start, int inputSize, int step) {
+void RealArray::SetBuffer(float *start, int inputSize, int step) {
     HandleBufferSize(inputSize);
     for(int i = 0; i < inputSize; i++) {
-        buffer[i] = std::complex<float>(start[step*i], start[step*i+1]);
+        buffer[i] = start[step*i];
     }
 }
 
-void ComplexArray::SetBufferReal(float *start, int inputSize) {
-    HandleBufferSize(inputSize);
-    for(int i = 0; i < inputSize; i++) {
-        buffer[i] = std::complex<float>(start[i], 0);
-    }
-}
 
-void ComplexArray::SetBuffer(std::vector<std::complex<double>> start, int offset, size_t copysize) {
+void RealArray::SetBuffer(std::vector<float> start, int offset, size_t copysize) {
     HandleBufferSize(copysize);
     for(size_t i = 0; i < copysize; i++) {
         buffer[i] = start[i + offset];
     }
 }
 
-void ComplexArray::SetBuffer(std::vector<std::complex<float>> start, int offset, size_t copysize) {
+void RealArray::SetBuffer(std::vector<double> start, int offset, size_t copysize){
     HandleBufferSize(copysize);
     for(size_t i = 0; i < copysize; i++) {
         buffer[i] = start[i + offset];
     }
 }
 
-void ComplexArray::SetBuffer(std::vector<double> start, int offset, size_t copysize){
-    HandleBufferSize(copysize);
-    for(size_t i = 0; i < copysize; i++) {
-        buffer[i] = start[i + offset];
-    }
-}
-
-void ComplexArray::SetBuffer(std::vector<float> start, int offset, size_t copysize){
-    HandleBufferSize(copysize);
-    for(size_t i = 0; i < copysize; i++) {
-        buffer[i] = start[i + offset];
-    }
-}
-
-
-int ComplexArray::GetBuffer(float *RequestedBuffer, int bufferSize) {
+int RealArray::GetBuffer(float *RequestedBuffer, int bufferSize) {
     if(bufferSize < size * 2) {
         return -1;
     }
 
-    for(int i = 0; i < size; i++) {
-        RequestedBuffer[2*i] = buffer[i].real();
-        RequestedBuffer[2*i+1] = buffer[i].imag();
-    }
+    // for(int i = 0; i < size; i++) {
+    //     RequestedBuffer[2*i] = buffer[i].real();
+    // }
+
+    memcpy(RequestedBuffer, buffer, size);
     return 0;
 }
 
-int ComplexArray::GetBufferOnlyReal(float *pBuffer, int bufferSize) {
-    if(bufferSize < size) {
-        return -1;
-    }
 
-    for(int i = 0; i < size; i++) {
-        pBuffer[i] = buffer[i].real();
-    } 
-    return size * sizeof(float);
-}
-
-
-int ComplexArray::GetElementSize() {
+int RealArray::GetElementSize() {
     return size;
 }
-int ComplexArray::GetBufferLenghtFloats() {
+int RealArray::GetBufferLenghtFloats() {
     return size * 2;
 }
 
-int ComplexArray::GetBufferSizeInBytes() {
+int RealArray::GetBufferSizeInBytes() {
     return size * 2 * sizeof(float);
 }
 
-int ComplexArray::GetMaxPos() {
-    auto maxelem = std::max_element(buffer, buffer + size, ComplexArray::ComplexCompare);
+int RealArray::GetMaxPos() {
+    auto maxelem = std::max_element(buffer, buffer + size, RealArray::ComplexCompare);
     int result = std::distance(buffer, maxelem);
     return result;
 }
 
-int ComplexArray::GetMinPos() {
-    auto minelem = std::min_element(buffer, buffer + size, ComplexArray::ComplexCompare);
+int RealArray::GetMinPos() {
+    auto minelem = std::min_element(buffer, buffer + size, RealArray::ComplexCompare);
     int result = std::distance(buffer, minelem);
     return result;
 }
 
-float ComplexArray::GetMaxValAbs() {
+float RealArray::GetMaxValAbs() {
     return std::abs(buffer[GetMaxPos()]);
 }
 
-float ComplexArray::GetMinValAbs() {
+float RealArray::GetMinValAbs() {
     return std::abs(buffer[GetMinPos()]);
 }
 
-void ComplexArray::SwapHalfs() {
+void RealArray::SwapHalfs() {
     std::copy(buffer + size / 2, buffer + size, ptemp);
     std::copy(buffer, buffer + size / 2, buffer + size / 2);
     std::copy(ptemp, ptemp + size/2, buffer);
 }
 
-ComplexArray ComplexArray::GetSorted() {
-    ComplexArray result(*this);
+RealArray RealArray::GetSorted() {
+    RealArray result(*this);
     result.Sort();
     return result;
 }
 
-void ComplexArray::Sort() {
-    std::sort(buffer, buffer + size, ComplexArray::ComplexCompare);
+void RealArray::Sort() {
+    std::sort(buffer, buffer + size, RealArray::ComplexCompare);
 }
 
-std::vector<std::pair<std::complex<float>, int>> ComplexArray::SortWithIndexes() {
-    std::vector<std::pair<std::complex<float>, int>> result;
+std::vector<std::pair<float, int>> RealArray::SortWithIndexes() {
+    std::vector<std::pair<float, int>> result;
     for(int i = 0; i < size; i++) {
-        result.push_back(std::pair<std::complex<float>, int>(buffer[i], i));
+        result.push_back(std::pair<float, int>(buffer[i], i));
     }
-    std::sort(result.begin(), result.end(), ComplexArray::ComplexComprarePairs);
+    std::sort(result.begin(), result.end(), RealArray::ComplexComprarePairs);
     return result;
 }
 
-void ComplexArray::PrintContentsForPython() {
+void RealArray::PrintContentsForPython() {
     printf("\na = [");
     for(int i = 0; i < size; i++) {
-        printf("%f+%fj,", buffer[i].real(), buffer[i].imag());
+        printf("%f,", buffer[i]);
     }
     printf("]\n");
 }
 
-void ComplexArray::SetAllImaginaryTo(float imag) {
-    for(int i = 0; i < size; i++) {
-        buffer[i] = std::complex<float>(buffer[i].real(), imag);
-    }
-}
 
-void ComplexArray::Normalize() {
+void RealArray::Normalize() {
     float max, min;
     Normalize(min, max);
 }
 
-void ComplexArray::Normalize(float &minAbs, float &maxAbs) {
+void RealArray::Normalize(float &minAbs, float &maxAbs) {
     maxValBeforeNormalize = buffer[GetMaxPos()];
     minValBeforeNormalize = buffer[GetMinPos()];
-    avarageBeforNormalize = std::complex<float>(0,0);
+    avarageBeforNormalize = 0;
     maxAbs = std::abs(maxValBeforeNormalize);
     minAbs = std::abs(minValBeforeNormalize);
     for(int i = 0; i < size; i++) {
@@ -294,13 +250,13 @@ void ComplexArray::Normalize(float &minAbs, float &maxAbs) {
 }
 
 
-void ComplexArray::ScaleWith(float scalar) {
+void RealArray::ScaleWith(float scalar) {
     for(int i = 0; i < size; i++) {
         buffer[i] = buffer[i] * scalar;
     }
 }
 
-void ComplexArray::GetNonZeroIndexes(std::vector<std::pair<int,int>> &indices, int slack) {
+void RealArray::GetNonZeroIndexes(std::vector<std::pair<int,int>> &indices, int slack) {
     float absval;
     bool isNonZeroStart = false;
     int indexStart = 0, zeroCounter = 0, oneCounter = 0;
@@ -353,7 +309,7 @@ void ComplexArray::GetNonZeroIndexes(std::vector<std::pair<int,int>> &indices, i
 }
 
 
-void ComplexArray::HandleBufferSize(int newSize) {
+void RealArray::HandleBufferSize(int newSize) {
     size = newSize;
     if(newSize != this->size) {
         size = newSize;
@@ -363,13 +319,13 @@ void ComplexArray::HandleBufferSize(int newSize) {
     int newBufferElementSize = (int) newSize * 1.5;
     delete ptemp;
     delete buffer;
-    buffer = new std::complex<float>[newBufferElementSize];
-    ptemp = new std::complex<float>[newBufferElementSize];
+    buffer = new float[newBufferElementSize];
+    ptemp = new float[newBufferElementSize];
     currentBuffersElementSize = newBufferElementSize;
 
 }
 
-int ComplexArray::SetSize(int newSize) {
+int RealArray::SetSize(int newSize) {
     if(newSize < currentBuffersElementSize) {
 
     } else {
@@ -381,7 +337,7 @@ int ComplexArray::SetSize(int newSize) {
     return 0;
 }
 
-// int ComplexArray::SetSize(int newSize) {
+// int RealArray::SetSize(int newSize) {
 //     if(newSize < currentBuffersElementSize) {
 //         if(newSize != this->size) {
 //             size = newSize;
@@ -392,7 +348,7 @@ int ComplexArray::SetSize(int newSize) {
 //     return 0;
 // }
 
-float ComplexArray::GetMeanAbs() {
+float RealArray::GetMeanAbs() {
     float result = 0;
     for(int i = 0; i < size; i++) {
         result += abs(buffer[i]) / (float) size;
@@ -401,8 +357,8 @@ float ComplexArray::GetMeanAbs() {
     return result;
 }
 
-std::complex<float> ComplexArray::GetMean() {
-    std::complex<float> result = 0;
+float RealArray::GetMean() {
+    float result = 0;
     for(int i = 0; i < size; i++) {
         result += (buffer[i]) / (float) size;
     }
@@ -410,14 +366,14 @@ std::complex<float> ComplexArray::GetMean() {
     return result;
 }
 
-void ComplexArray::PartialCopyTwoArrays(ComplexArray& in1, int offset1, int size1, ComplexArray& in2, int offset2, int size2) {
+void RealArray::PartialCopyTwoArrays(RealArray& in1, int offset1, int size1, RealArray& in2, int offset2, int size2) {
     int resultingSize = size1 + size2;
     SetSize(resultingSize);
     std::copy(in1.buffer+offset1, in1.buffer + offset1 + size1, buffer);
     std::copy(in2.buffer+offset2, in2.buffer + offset2 + size2, buffer+size1);
 }
 
-void ComplexArray::CopyFromAnotherArray(ComplexArray& input, int offset, int copySize) {
+void RealArray::CopyFromAnotherArray(RealArray& input, int offset, int copySize) {
     int resultingSize = copySize;
     SetSize(resultingSize);
     std::copy(input.buffer+offset, input.buffer + offset + copySize, buffer);
