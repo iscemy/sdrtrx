@@ -128,10 +128,8 @@ ComplexArray ComplexArray::GetConjugate() {
 
 ComplexArray::~ComplexArray()
 {
-    if (isBufferOwnedByThis && isBufferInited){
+    if (isBufferOwnedByThis && isBufferInited)
         delete buffer;
-        delete ptemp;    
-    }
 }
 
 void ComplexArray::SetBuffer(int16_t *start, int inputSize, int step) {
