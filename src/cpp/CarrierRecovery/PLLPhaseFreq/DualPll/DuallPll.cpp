@@ -1,5 +1,6 @@
 #include "CarrierRecovery/PLLPhaseFreq/DualPll/DuallPll.h"
-
+#include "cmath"
+using namespace std;
 
 DualPll::DualPll(float fs, float f0, int BufferSize) { 
     this->f0 = f0;
@@ -8,7 +9,7 @@ DualPll::DualPll(float fs, float f0, int BufferSize) {
     t2.LateInit(BufferSize);
 }
 
-void DualPll::RunAlgorithm(ComplexArray &input, ComplexArray &output, float coarsef0) {
+void DualPll::RunAlgorithm(RealArray &input, RealArray &output, float coarsef0) {
     if (input.GetElementSize() > t1.GetElementSize()) {
         //TODO resize
     }
@@ -37,8 +38,8 @@ void DualPll::RunAlgorithm(ComplexArray &input, ComplexArray &output, float coar
     t2d[0] = td2init;
     double coarsef0d = coarsef0, fsd = fs;
     for(int i = 0; i < input.GetElementSize(); i++) {
-        t1d[i+1] = t1d[i] - mu1 * ((double)input[i].real()) * sin(4.0 * (M_PI) *  coarsef0 * ((double) i) * 1.0f/fsd + 2.0*t1d[i]);
-        t2d[i+1] = t2d[i] - mu2 * ((double)input[i].real()) * sin(4.0 * (M_PI)  * coarsef0 * ((double) i) * 1.0f/fsd + 2.0*t1d[i] + 2.0 * t2d[i]);
+        t1d[i+1] = t1d[i] - mu1 * ((double)input[i]) * sin(4.0 * (M_PI) *  coarsef0 * ((double) i) * 1.0f/fsd + 2.0*t1d[i]);
+        t2d[i+1] = t2d[i] - mu2 * ((double)input[i]) * sin(4.0 * (M_PI)  * coarsef0 * ((double) i) * 1.0f/fsd + 2.0*t1d[i] + 2.0 * t2d[i]);
         output[i] = cos(2.0*(M_PI)*coarsef0d/fsd*((double) i)+t1d[i]+t2d[i]);
     }
 

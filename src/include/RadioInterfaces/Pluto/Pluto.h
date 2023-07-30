@@ -3,8 +3,8 @@
 
 class Pluto : public IRadio{
 public:
-    int Receive(ComplexArray &data);
-    int Transmit(ComplexArray &data);
+    int Receive(RealArray &data);
+    int Transmit(RealArray &data);
     static Pluto *GetInstance();
     int SetRxParameters(float lo_hz, float sample_rate_sps, float bandwidth_hz, float hwgain_hz);
     int SetTxParameters(float lo_hz, float sample_rate_sps, float bandwidth_hz, float hwgain_hz);

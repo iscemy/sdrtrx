@@ -9,8 +9,8 @@ private:
     fftw_plan forwardPlan, backwardPlan;
     int planComplexNumberSize;
 public:
-    void DoForwardFFT(ComplexArray &input, ComplexArray &output);
-    void DoBackwardFFT(ComplexArray &input, ComplexArray &output);
+    void DoForwardFFT(RealArray &input, RealArray &output);
+    void DoBackwardFFT(RealArray &input, RealArray &output);
     
     FFTW(int size);
     ~FFTW();

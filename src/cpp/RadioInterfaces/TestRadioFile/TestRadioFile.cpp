@@ -1,11 +1,12 @@
 #include "RadioInterfaces/TestRadioFile/TestRadioFile.h"
 #include "Utilities/libnpy.hpp"
 
+
 TestRadioFile::TestRadioFile(std::string path) {
     this->path = path;
     npy::LoadArrayFromNumpy(path.c_str(), shape, fortran_order, DataReadFromFile);
 }
-int TestRadioFile::Receive(ComplexArray &data) {
+int TestRadioFile::Receive(RealArray &data) {
     int readSize;
     int dataLeft = DataReadFromFile.size() - index;
 
@@ -27,7 +28,7 @@ int TestRadioFile::Receive(ComplexArray &data) {
     return readSize;
 
 }
-int TestRadioFile::Transmit(ComplexArray &data) {
+int TestRadioFile::Transmit(RealArray &data) {
     data = data;
     return 0;
 }

@@ -1,7 +1,7 @@
-#include "Math/ComplexArray/ComplexArray.h"
+#include "Math/RealArray/RealArray.h"
 #pragma once
 class IRadio {
     public:
-    virtual int Receive(ComplexArray &data) = 0;
-    virtual int Transmit(ComplexArray &data) = 0;
+    virtual int Receive(RealArray &data) = 0;
+    virtual int Transmit(RealArray &data) = 0;
 };

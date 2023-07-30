@@ -7,8 +7,8 @@ BasicModulator::BasicModulator(float fsHz, float filterFreqHz, float filterBWHz)
     ChangeParameters(fsHz, filterFreqHz, filterBWHz);
 }
 
-void BasicModulator::RunAlgorithm(ComplexArray &interfreq, ComplexArray &carrier, ComplexArray &baseband){ 
-    ComplexArray temp = carrier * interfreq;
+void BasicModulator::RunAlgorithm(RealArray &interfreq, RealArray &carrier, RealArray &baseband){ 
+    RealArray temp = carrier * interfreq;
     pFilter->RunFilter(temp, baseband, true);
 }
 
@@ -29,7 +29,7 @@ void BasicModulator::CreateFilter() {
     //for test purposes
 
     BasicFilter* pFilt = new BasicFilter(new BasicConvolve());
-    ComplexArray taps(50);
+    RealArray taps(50);
     float tap_values[50] = {-1.29780457e-04, -4.16168084e-04, -7.87375111e-04, -1.29124619e-03,
                         -1.94827159e-03, -2.73719969e-03, -3.58506086e-03, -4.36357077e-03,
                         -4.89317168e-03, -4.95505188e-03, -4.31046417e-03, -2.72567076e-03,
@@ -43,7 +43,7 @@ void BasicModulator::CreateFilter() {
                         -4.95505188e-03, -4.89317168e-03, -4.36357077e-03, -3.58506086e-03,
                         -2.73719969e-03, -1.94827159e-03, -1.29124619e-03, -7.87375111e-04,
                         -4.16168084e-04, -1.29780457e-04};
-    taps.SetBufferReal(tap_values, 50);
+    taps.SetBuffer(tap_values, 50, 1);
 
     pFilt->SetFilterTaps(taps);
     pFilter = pFilt;

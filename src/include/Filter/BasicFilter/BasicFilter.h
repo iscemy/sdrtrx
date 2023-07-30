@@ -15,12 +15,12 @@ bandpass, lowpass, notch, -> child classes
     methods to set the parameters that used to generate taps
 */
     BasicFilter(IConvolve *pConvolve);
-    void SetFilterTaps(ComplexArray &taps);
-    void RunFilter(ComplexArray &input, ComplexArray &output, bool fixFirOffset = false);
+    void SetFilterTaps(RealArray &taps);
+    void RunFilter(RealArray &input, RealArray &output, bool fixFirOffset = false);
     int GetOutputSize(int inputSize);
 
 private:
     bool isTapsSet = false;
-    ComplexArray taps;
+    RealArray taps;
     IConvolve *pConv;
 };

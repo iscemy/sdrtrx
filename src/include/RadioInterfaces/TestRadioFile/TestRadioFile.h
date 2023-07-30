@@ -1,5 +1,7 @@
 #include "RadioInterfaces/IRadio.h"
 #include "vector"
+#include "string"
+
 class TestRadioFile : public IRadio {
     private:
     std::string path;
@@ -11,7 +13,7 @@ class TestRadioFile : public IRadio {
     public:
     TestRadioFile(std::string path);
     ~TestRadioFile();
-    int Receive(ComplexArray &data);
-    int Transmit(ComplexArray &data);
+    int Receive(RealArray &data);
+    int Transmit(RealArray &data);
 
 };

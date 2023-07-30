@@ -3,6 +3,7 @@
 #include "Math/RealArray/RealArray.h"
 #include "algorithm"
 #include "cstring"
+#include "cstdio"
 
 void RealArray::CreateBuffers(int size) {
     buffer = new float[size];
@@ -266,7 +267,7 @@ void RealArray::GetNonZeroIndexes(std::vector<std::pair<int,int>> &indices, int 
     // float treshold = 0.65;
 
     for(int i = 0; i < size; i++) {
-        absval = abs(buffer[i]);
+        absval = std::abs(buffer[i]);
         if(absval < treshold) {
             zeroCounter++;
             oneCounter = 0;
@@ -351,7 +352,7 @@ int RealArray::SetSize(int newSize) {
 float RealArray::GetMeanAbs() {
     float result = 0;
     for(int i = 0; i < size; i++) {
-        result += abs(buffer[i]) / (float) size;
+        result += std::abs(buffer[i]) / (float) size;
     }
 
     return result;

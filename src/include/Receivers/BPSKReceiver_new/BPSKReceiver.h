@@ -9,25 +9,25 @@ public:
 private:
     IRadio *pRadio;
     std::vector<uint8_t> decodedBits;
-    ComplexArray intermediateFreqSignal0, intermediateFreqSignal1, moduleReceiveBuffer, zeroBuffer, partialProcessBuffer, inputLowPassFiltered;
+    RealArray intermediateFreqSignal0, intermediateFreqSignal1, moduleReceiveBuffer, zeroBuffer, partialProcessBuffer, inputLowPassFiltered;
     int receiverState;
     static const int intermediateFreqSignalSize = 8000, zeroBufferSize = 1000;
 
-    void MergeBuffers(ComplexArray &buffer1, int index1, int size1, ComplexArray &buffer2, int index2, int size2, ComplexArray &bufferOut, int size);
-    void ProcessFrame(ComplexArray &input, std::vector<uint8_t> &output, int inputOffest, int inputSize);
-    void ProcessFrame(ComplexArray &input, ComplexArray &preprocessed, std::vector<uint8_t> &output, int inputOffest, int inputSize);
+    void MergeBuffers(RealArray &buffer1, int index1, int size1, RealArray &buffer2, int index2, int size2, RealArray &bufferOut, int size);
+    void ProcessFrame(RealArray &input, std::vector<uint8_t> &output, int inputOffest, int inputSize);
+    void ProcessFrame(RealArray &input, RealArray &preprocessed, std::vector<uint8_t> &output, int inputOffest, int inputSize);
 
-    ComplexArray *GetCurrentProcessingBuffer();
-    ComplexArray *GetPreviousProcessingBuffer();
-    ComplexArray *GetCurrentReceiveBuffer();
+    RealArray *GetCurrentProcessingBuffer();
+    RealArray *GetPreviousProcessingBuffer();
+    RealArray *GetCurrentReceiveBuffer();
 
-    void SetCurrentProcessingBuffer(ComplexArray *buffer);
-    void SetPreviousProcessingBuffer(ComplexArray *buffer);
-    void SetCurrentReceiveBuffer(ComplexArray *buffer);
+    void SetCurrentProcessingBuffer(RealArray *buffer);
+    void SetPreviousProcessingBuffer(RealArray *buffer);
+    void SetCurrentReceiveBuffer(RealArray *buffer);
 
     void SwapBuffers();
 
-    ComplexArray *CurrentProcessBuffer, *ReceiveBuffer, *PreviousProcessBuffer;
+    RealArray *CurrentProcessBuffer, *ReceiveBuffer, *PreviousProcessBuffer;
 
     static const int receiveBufferSize = 1024 * 1024;
     

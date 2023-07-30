@@ -16,7 +16,7 @@ FFTW::FFTW(int size)
     planComplexNumberSize = size;                        
 }
 
-void FFTW::DoForwardFFT(ComplexArray &input, ComplexArray &output) {
+void FFTW::DoForwardFFT(RealArray &input, RealArray &output) {
     int inputSize = input.GetElementSize(), fftBufferSize = planComplexNumberSize;
     int fftBufferOffset = (fftBufferSize - inputSize)/2;
     if(inputSize <= fftBufferSize) {
@@ -35,7 +35,7 @@ void FFTW::DoForwardFFT(ComplexArray &input, ComplexArray &output) {
     
     output.SwapHalfs();
 }
-void FFTW::DoBackwardFFT(ComplexArray &input, ComplexArray &output) {
+void FFTW::DoBackwardFFT(RealArray &input, RealArray &output) {
     input.GetBuffer((float*)inBuffer, planComplexNumberSize * 2);
     fftw_execute(backwardPlan);
     output.SetBuffer((float*)outBuffer, planComplexNumberSize, 2);

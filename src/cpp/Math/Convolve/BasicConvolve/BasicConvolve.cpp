@@ -1,13 +1,13 @@
 #include "Math/Convolve/BasicConvolve/BasicConvolve.h"
 
-ComplexArray BasicConvolve::DoConvolve(ComplexArray &input, ComplexArray &filter){
+RealArray BasicConvolve::DoConvolve(RealArray &input, RealArray &filter){
     int filterSize = filter.GetElementSize();
     int inputSize = input.GetElementSize();
     int resultSize = GetResultingSize(inputSize, filterSize), resultIndex = 0;
 
-    std::complex<float> temp;
+    float temp;
 
-    ComplexArray result(resultSize);
+    RealArray result(resultSize);
 
     for(int i = 0; i < filterSize - 1; i++) {
         temp = 0;
@@ -41,16 +41,16 @@ ComplexArray BasicConvolve::DoConvolve(ComplexArray &input, ComplexArray &filter
     return result;
 }
 //TODO no copy, give reference
-void BasicConvolve::DoConvolve(ComplexArray &input, ComplexArray &filter, ComplexArray &output){
+void BasicConvolve::DoConvolve(RealArray &input, RealArray &filter, RealArray &output){
     output = DoConvolve(input, filter);
 }
 
-void BasicConvolve::DoConvolve(ComplexArray &input, ComplexArray &filter, ComplexArray &result, int inputConvolveSize) {
+void BasicConvolve::DoConvolve(RealArray &input, RealArray &filter, RealArray &result, int inputConvolveSize) {
     int filterSize = filter.GetElementSize();
     int inputSize = inputConvolveSize;
     int resultIndex = 0;
 
-    std::complex<float> temp;
+    float temp;
 
 
     for(int i = 0; i < filterSize - 1; i++) {

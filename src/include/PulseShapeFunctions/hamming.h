@@ -1,8 +1,8 @@
-#include "Math/ComplexArray/ComplexArray.h"
-
+#include "Math/RealArray/RealArray.h"
+#include <cmath>
 namespace PulseShaping {
 
-    void hamming(ComplexArray &output) {
+    void hamming(RealArray &output) {
         int N = output.GetElementSize();
 
         for(int i = 0; i < N; i++) {

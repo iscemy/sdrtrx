@@ -12,11 +12,11 @@ public:
 private:
     IRadio *pRadio;
     std::vector<uint8_t> decodedBits;
-    ComplexArray receiveBuffer, processBuffer, receiveBufferPrev, highPassFiltered;
+    RealArray receiveBuffer, processBuffer, receiveBufferPrev, highPassFiltered;
     int receiverState;
     static const int intermediateFreqSignalSize = 8000, zeroBufferSize = 1000;
 
-    ComplexArray *CurrentProcessBuffer, *ReceiveBuffer, *PreviousProcessBuffer;
+    RealArray *CurrentProcessBuffer, *ReceiveBuffer, *PreviousProcessBuffer;
 
     static const int receiveBufferSize = 1024 * 1024;
     

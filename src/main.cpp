@@ -1,5 +1,5 @@
 #include <iostream>
-#include "Math/ComplexArray/ComplexArray.h"
+#include "Math/RealArray/RealArray.h"
 #include "PulseShapeFunctions/hamming.h"
 #include "Math/Convolve/BasicConvolve/BasicConvolve.h"
 #include "RadioInterfaces/TestRadioFile/TestRadioFile.h"
@@ -23,7 +23,7 @@ extern "C" {
 
 using namespace std;
 
-//TODO:optimize ComplexArray assignment operations
+//TODO:optimize RealArray assignment operations
 #define USE_HARDWARE
 // #undef USE_HARDWARE
 
@@ -32,7 +32,7 @@ int main(int, char**){
     IRadio *pRadio;
 
 
-    // ComplexArray receiveBuffer(8000);
+    // RealArray receiveBuffer(8000);
 
     // pluto->Receive(receiveBuffer);
 

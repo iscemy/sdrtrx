@@ -1,5 +1,6 @@
 #include "RadioInterfaces/Pluto/Pluto.h"
 #include "Utilities/log.h"
+#include "stdio.h"
 #ifdef PLUTO
 struct iio_context *Pluto::ctx = nullptr;
 struct iio_channel *Pluto::rx0_i = nullptr;
@@ -10,7 +11,7 @@ struct iio_buffer  *Pluto::rxbuf = nullptr;
 struct iio_buffer  *Pluto::txbuf = nullptr;
 Pluto *Pluto::pInstance = nullptr;
 
-int Pluto::Receive(ComplexArray &data) {
+int Pluto::Receive(RealArray &data) {
     data = data;
     ptrdiff_t p_inc;
     int16_t *receivedDataMapped;
@@ -36,7 +37,7 @@ int Pluto::Receive(ComplexArray &data) {
     return nbytes_rx;
 }
 
-int Pluto::Transmit(ComplexArray &data) {
+int Pluto::Transmit(RealArray &data) {
     data = data;
     return 0;
 }

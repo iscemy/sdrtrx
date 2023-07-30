@@ -1,6 +1,6 @@
 #include "Filter/BasicFilter/BasicFilter.h"
 
-void BasicFilter::RunFilter(ComplexArray &input, ComplexArray &output, bool FixFirOffset){
+void BasicFilter::RunFilter(RealArray &input, RealArray &output, bool FixFirOffset){
     pConv->DoConvolve(input, taps, output);
     if(FixFirOffset) {
         int offset = (taps.GetElementSize() - 1) / 2;
@@ -22,7 +22,7 @@ int BasicFilter::GetOutputSize(int inputSize){
 BasicFilter::BasicFilter(IConvolve *pConvolve) {
     this->pConv = pConvolve;
 }
-void BasicFilter::SetFilterTaps(ComplexArray &taps) {
+void BasicFilter::SetFilterTaps(RealArray &taps) {
     isTapsSet = true;
     this->taps = taps;
 }

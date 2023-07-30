@@ -1,4 +1,4 @@
-#include "Math/ComplexArray/ComplexArray.h"
+#include "Math/RealArray/RealArray.h"
 #include <mutex>
 #include "Math/Convolve/BasicConvolve/BasicConvolve.h"
 #include "RadioInterfaces/IRadio.h"
@@ -18,13 +18,13 @@ private:
     std::mutex tx_buffer_mutex;
     int tx_buffer_overrun_cnt;
     int tx_buffer_write_index, tx_buffer_read_index;
-    ComplexArray temp, pulseShapedSignal;
+    RealArray temp, pulseShapedSignal;
 
     IRadio *pRadio;
     IConvolve *pConv;
     int oversamplingFactor;
     float toffset, P, beta, fs;
 
-    int PulseShape(ComplexArray &pulseShaper, uint8_t *pData, int size);
-    void UpConvertPulseShaped(ComplexArray &signalToUpConvert, float freq);
+    int PulseShape(RealArray &pulseShaper, uint8_t *pData, int size);
+    void UpConvertPulseShaped(RealArray &signalToUpConvert, float freq);
 };

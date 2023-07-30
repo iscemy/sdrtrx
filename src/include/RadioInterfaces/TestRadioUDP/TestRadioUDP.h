@@ -5,8 +5,8 @@
 class TestRadioUDP : public IRadio{
 public:
     TestRadioUDP(const char *remote_ip, uint16_t remote_port, const char *local_ip, uint16_t localport);
-    virtual int Receive(ComplexArray &data);
-    virtual int Transmit(ComplexArray &data);
+    virtual int Receive(RealArray &data);
+    virtual int Transmit(RealArray &data);
 private:
     SocketWrapper *pSock;
     uint8_t receiveBuffer[1024*1024];

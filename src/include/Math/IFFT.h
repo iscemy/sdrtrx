@@ -1,9 +1,9 @@
-#include "Math/ComplexArray/ComplexArray.h"
+#include "Math/RealArray/RealArray.h"
 
 #pragma once
 class IFFT {
     public:
-    virtual void DoForwardFFT(ComplexArray &input, ComplexArray &output) = 0;
-    virtual void DoBackwardFFT(ComplexArray &input, ComplexArray &output) = 0;
+    virtual void DoForwardFFT(RealArray &input, RealArray &output) = 0;
+    virtual void DoBackwardFFT(RealArray &input, RealArray &output) = 0;
 
 };

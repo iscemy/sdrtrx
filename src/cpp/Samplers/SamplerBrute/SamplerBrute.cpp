@@ -20,7 +20,7 @@ TimeRecBrute::TimeRecBrute(int oversampleFactor, std::vector<int> patternExpecte
 
 //TODO: implement AGC, or moving normalizing
 
-int TimeRecBrute::RunAlgorithm(ComplexArray &input, std::vector<int> &output, int inputOffset, int inputProcessSize) {
+int TimeRecBrute::RunAlgorithm(RealArray &input, std::vector<int> &output, int inputOffset, int inputProcessSize) {
     std::vector<int> sampledTemp;
     int sampleLatencyIndex, numOfBits;
     bool samplerError, isBufferValid = false, isPiErrorExists = false;
@@ -55,7 +55,7 @@ int TimeRecBrute::RunAlgorithm(ComplexArray &input, std::vector<int> &output, in
     return output.size();
 }
 
-bool TimeRecBrute::ValidateBuffer(ComplexArray &input, int inputOffset, int inputProcessSize, int &sampleLatencyIndex, int &numOfBits, bool isPiErrorExists) {
+bool TimeRecBrute::ValidateBuffer(RealArray &input, int inputOffset, int inputProcessSize, int &sampleLatencyIndex, int &numOfBits, bool isPiErrorExists) {
     std::vector<int> temp, patternExpected;
     uint16_t preamble, trailer, numOfBytes;
     int patternSize = phyPreambleSizeInBits;
@@ -79,7 +79,7 @@ bool TimeRecBrute::ValidateBuffer(ComplexArray &input, int inputOffset, int inpu
     for(int i = inputOffset; i < oversampleFactor * 3 + inputOffset; i++) {
         correlationval = 0;
         for(int j = 0; (j < patternSize) && ((i + j * oversampleFactor) < (inputOffset + inputProcessSize)); j++) {
-            correlationval += input[i + j * oversampleFactor].real() * patternExpected[j];
+            correlationval += input[i + j * oversampleFactor] * patternExpected[j];
         }
         correlationArray.push_back(correlationval);
     }
@@ -134,12 +134,12 @@ bool TimeRecBrute::ValidateBuffer(ComplexArray &input, int inputOffset, int inpu
     return true;
 }
 
-int TimeRecBrute::Sampler(ComplexArray &input, std::vector<int> &output, int inputOffset, int inputProcessSize, bool &samplerError) {
+int TimeRecBrute::Sampler(RealArray &input, std::vector<int> &output, int inputOffset, int inputProcessSize, bool &samplerError) {
     output.clear();
     samplerError = false;
     for(int i = inputOffset; i < inputOffset + inputProcessSize;  i += oversampleFactor) {
-        if(((input[i].real() > 0.1) && (input[i].real() > 0)) || ((input[i].real() < -0.1) && (input[i].real() < 0))) // ???
-            output.push_back(input[i].real() > 0.1);
+        if(((input[i] > 0.1) && (input[i] > 0)) || ((input[i] < -0.1) && (input[i] < 0))) // ???
+            output.push_back(input[i] > 0.1);
         else {
             //output.clear();
             samplerError = true;

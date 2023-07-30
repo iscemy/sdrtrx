@@ -34,18 +34,18 @@ void BPSKReceiver::mainThread() {
     BasicConvolve conv;
 
     BasicFilter highPassFilter(&conv);
-    ComplexArray filtertaps(lowPassFilterSize);
-    filtertaps.SetBufferReal(lowPassFilterTaps, lowPassFilterSize);
+    RealArray filtertaps(lowPassFilterSize);
+    filtertaps.SetBuffer(lowPassFilterTaps, lowPassFilterSize, 1);
     highPassFilter.SetFilterTaps(filtertaps);
 
     resultingSize = sqrpreprocess.GetOutputSize(intermediateFreqSignalSize);
     FFTW fft(resultingSize * 2);
     FFTFreqRecovery fftrec(&fft);
-    ComplexArray rp(resultingSize), carrierRecovered(resultingSize);
+    RealArray rp(resultingSize), carrierRecovered(resultingSize);
 
     DualPll pllRecoverer(fs, f0);
     BasicModulator downconvert(fs, 0, 4e4);
-    ComplexArray baseband(downconvert.getOuputSize(resultingSize));
+    RealArray baseband(downconvert.getOuputSize(resultingSize));
 
     std::vector<int> pattern = {-1,1,-1,1,-1,1,-1,1};
     TimeRecBrute sampler(oversampleFactor, pattern);
@@ -58,13 +58,13 @@ void BPSKReceiver::mainThread() {
     std::vector<std::pair<int,int>> indices, indices_baseband;
     std::vector<int> output;
 
-    ComplexArray partialProcessBuffer(intermediateFreqSignalSize);
+    RealArray partialProcessBuffer(intermediateFreqSignalSize);
 
     while(1) {
 
         pRadio->Receive(receiveBuffer);
         t0 = duration_cast< milliseconds >(system_clock::now().time_since_epoch());
-        receiveBuffer.SetAllImaginaryTo(0);
+        // receiveBuffer.SetAllImaginaryTo(0);
 
         receiveBuffer.Normalize(minReceivedAbsVal, maxReceivedAbsVal);
         // float minMaxRatio = ((float)maxReceivedAbsVal) /((float)minReceivedAbsVal);
@@ -138,10 +138,10 @@ void BPSKReceiver::mainThread() {
                     int bytes = sampler.RunAlgorithm(baseband, output, indices_baseband[i].first, indices_baseband[i].second - indices_baseband[i].first);
                     if(bytes > 0) {
                         // printf("birkac byte aldik hatasiz \n");
-                        for(auto &received_byte : output) {
-                            printf("%x ", received_byte);
-                        }
-                        printf("\n"); 
+                        // for(auto &received_byte : output) {
+                        //     printf("%x ", received_byte);
+                        // }
+                        // printf("\n"); 
                     } else {
                         printf("ins paket kesildigindendir %f %d\n", recoveredFreqCoarse, indices_baseband[i].first);
 
@@ -182,7 +182,7 @@ void BPSKReceiver::PrintCycleTime() {
     t1 = duration_cast< milliseconds >(system_clock::now().time_since_epoch());
     long long int tdiffms = (t1 - t0).count();
     if(tdiffms > 8) {
-
+        // printf("tdiff %lldms \n", tdiffms);
     }
     
 }

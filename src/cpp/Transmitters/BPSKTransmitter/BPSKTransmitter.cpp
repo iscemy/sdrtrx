@@ -2,7 +2,7 @@
 #include "PulseShapeFunctions/srrc.h"
 #include "cstring"
 #include "unistd.h"
-
+#include "cmath"
 #define debug
 //todo implement queue on tx_buffer
 void BPSKTransmitter::mainThread() {
@@ -16,7 +16,7 @@ void BPSKTransmitter::mainThread() {
 #endif
     temp.LateInit(oversamplingFactor * maxDataBitSizePerTransmit);
     pulseShapedSignal.LateInit(oversamplingFactor * maxDataBitSizePerTransmit);
-    ComplexArray pulseShaper;
+    RealArray pulseShaper;
     PulseShaping::s_rrc(oversamplingFactor, beta, P, toffset, pulseShaper);
 
     int read_size, signal_size;
@@ -51,7 +51,7 @@ BPSKTransmitter::BPSKTransmitter(IRadio *pRadio) {
     this->pRadio = pRadio;
 }
 
-int BPSKTransmitter::PulseShape(ComplexArray &pulseShaper, uint8_t *pData, int size) {
+int BPSKTransmitter::PulseShape(RealArray &pulseShaper, uint8_t *pData, int size) {
     //OverSampling
     for(int i = 0; i < size; i++) {
         for(int k = 0; k < 8; k++){
@@ -67,13 +67,21 @@ int BPSKTransmitter::PulseShape(ComplexArray &pulseShaper, uint8_t *pData, int s
     return pConv->GetResultingSize(temp.GetElementSize(), pulseShaper.GetElementSize());
 }
 
-void BPSKTransmitter::UpConvertPulseShaped(ComplexArray &signalToUpConvert, float freq) {
+void BPSKTransmitter::UpConvertPulseShaped(RealArray &signalToUpConvert, float freq) {
+    #if 0
     int size = signalToUpConvert.GetElementSize();
     float imag, real;
     float tpfcfs = 2.0f * M_PI * freq / fs;
     for(int i = 0; i < size; i++) {
-        imag = signalToUpConvert[i].real() * sinf32(tpfcfs * ((float) i));
-        real = signalToUpConvert[i].real() * cosf32(tpfcfs * ((float) i));
+        imag = signalToUpConvert[i] * sinf32(tpfcfs * ((float) i));
+        real = signalToUpConvert[i] * cosf32(tpfcfs * ((float) i));
         signalToUpConvert[i] = std::complex<float>(real, imag);
     }
+    #else
+
+    signalToUpConvert = signalToUpConvert;
+    freq = freq;
+
+    #endif
+
 }

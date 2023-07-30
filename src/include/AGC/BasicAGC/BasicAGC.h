@@ -1,8 +1,8 @@
-#include "Math/ComplexArray/ComplexArray.h"
+#include "Math/RealArray/RealArray.h"
 
 class BasicAGC {
 public:
-    // void RunAlgorithm(ComplexArray &input, ComplexArray &output) {
+    // void RunAlgorithm(RealArray &input, RealArray &output) {
 
     // }
 };

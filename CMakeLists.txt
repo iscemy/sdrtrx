@@ -7,7 +7,7 @@ include(CTest)
 enable_testing()
 
 add_executable(modem src/main.cpp 
-            src/cpp/Math/ComplexArray/ComplexArray.cpp
+            
             src/cpp/Math/FFTW/FFTW.cpp
             src/cpp/RadioInterfaces/TestRadioFile/TestRadioFile.cpp
             src/cpp/CarrierRecovery/FFTFreqCoarse/FFTFreqRecovery.cpp
@@ -23,6 +23,7 @@ add_executable(modem src/main.cpp
             src/cpp/Transmitters/BPSKTransmitter/BPSKTransmitter.cpp
             src/cpp/RadioInterfaces/TestRadioUDP/TestRadioUDP.cpp
             src/cpp/RadioInterfaces/Pluto/Pluto.cpp
+            src/cpp/Math/RealArray/RealArray.cpp
             )
             
 include_directories("src/include")

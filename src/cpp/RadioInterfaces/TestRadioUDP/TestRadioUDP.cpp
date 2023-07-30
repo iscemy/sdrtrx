@@ -5,7 +5,7 @@ TestRadioUDP::TestRadioUDP(const char *remote_ip, uint16_t remote_port, const ch
     this->pSock = new SocketWrapper(remote_ip, remote_port, local_ip, localport);
 }
 
-int TestRadioUDP::Receive(ComplexArray &data) {
+int TestRadioUDP::Receive(RealArray &data) {
     
     int ret = pSock->Receive(receiveBuffer, sizeof(receiveBuffer), 0);
     
@@ -21,12 +21,12 @@ int TestRadioUDP::Receive(ComplexArray &data) {
     // if((ret/((int)sizeof(float))) > data.GetElementSize()) {
     //     ret = data.GetElementSize() * sizeof(float);
     // }
-    data.SetBufferReal((float*)receiveBuffer, ret/sizeof(float));
+    data.SetBuffer((float*)receiveBuffer, ret/sizeof(float), 1);
     return ret;
 }
 
-int TestRadioUDP::Transmit(ComplexArray &data) {
+int TestRadioUDP::Transmit(RealArray &data) {
 
-    int numOfBytes = data.GetBufferOnlyReal((float*)txBuffer, sizeof(txBuffer)/sizeof(float)); 
-    return pSock->Send(txBuffer, numOfBytes);;
+    int numOfBytes = data.GetBuffer((float*)txBuffer, sizeof(txBuffer)/sizeof(float)); 
+    return pSock->Send(txBuffer, numOfBytes);
 }

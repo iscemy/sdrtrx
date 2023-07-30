@@ -32,7 +32,7 @@ void BPSKReceiver::mainThread() {
     BasicConvolve conv;
 
     BasicFilter lowPassFilter(&conv);
-    ComplexArray filtertaps(lowPassFilterSize);
+    RealArray filtertaps(lowPassFilterSize);
     filtertaps.SetBufferReal(lowPassFilterTaps, lowPassFilterSize);
     lowPassFilter.SetFilterTaps(filtertaps);
     
@@ -51,12 +51,12 @@ void BPSKReceiver::mainThread() {
     resultingSize = sqrpreprocess.GetOutputSize(intermediateFreqSignalSize);
     FFTW fft(resultingSize * 2);
     FFTFreqRecovery fftrec(&fft);
-    ComplexArray rp(resultingSize), carrierRecovered(resultingSize);
+    RealArray rp(resultingSize), carrierRecovered(resultingSize);
 
     float recoveredFreqCoarse, maxReceivedAbsVal, minReceivedAbsVal;
     DualPll pllRecoverer(fs, f0);
     BasicModulator downconvert(fs, 0, 4e4);
-    ComplexArray baseband(downconvert.getOuputSize(resultingSize));
+    RealArray baseband(downconvert.getOuputSize(resultingSize));
 
     std::vector<int> pattern = {-1,1,-1,1,-1,1,-1,1};
     TimeRecBrute sampler(oversampleFactor, pattern);
@@ -70,14 +70,14 @@ void BPSKReceiver::mainThread() {
 
     int samplesLeftFromPreviousProcessing = 0;
     milliseconds t0, t1;
-    // ComplexArray *pProcessCurrentBackup;
+    // RealArray *pProcessCurrentBackup;
     // pProcessCurrentBackup = &*(pProcessCurrentBackup);
     bool firstRun = true;
     int numOfReceives = 0;
     while(1) {
         numOfReceives++;
-        ComplexArray *pProcessPrev = GetPreviousProcessingBuffer();
-        ComplexArray *pReceiveBuffer = GetCurrentReceiveBuffer();
+        RealArray *pProcessPrev = GetPreviousProcessingBuffer();
+        RealArray *pReceiveBuffer = GetCurrentReceiveBuffer();
         pReceiveBuffer->SetSize(intermediateFreqSignalSize);
 
         pRadio->Receive(*pReceiveBuffer);
@@ -137,7 +137,7 @@ void BPSKReceiver::mainThread() {
                 fftrec.processBuffer(rp, f0, 10e3, recoveredFreqCoarse, fs);
                 pllRecoverer.RunAlgorithm(rp, carrierRecovered, recoveredFreqCoarse);
                 // carrierRecovered.PrintContentsForPython();
-                ComplexArray carrierRecovered_offseted(carrierRecovered, 100);
+                RealArray carrierRecovered_offseted(carrierRecovered, 100);
                 downconvert.RunAlgorithm(partialProcessBuffer, carrierRecovered_offseted, baseband);
                 baseband.Normalize();
                 baseband.GetNonZeroIndexes(indices_partial);
@@ -186,40 +186,40 @@ void BPSKReceiver::mainThread() {
     }
 }
 
-// void BPSKReceiver::ProcessFrame(ComplexArray &input, std::vector<uint8_t> &output, int inputOffest, int inputSize) {
+// void BPSKReceiver::ProcessFrame(RealArray &input, std::vector<uint8_t> &output, int inputOffest, int inputSize) {
 
 // }
 
-// void BPSKReceiver::ProcessFrame(ComplexArray &input, ComplexArray &preprocessed, std::vector<uint8_t> &output, int inputOffest, int inputSize) {
+// void BPSKReceiver::ProcessFrame(RealArray &input, RealArray &preprocessed, std::vector<uint8_t> &output, int inputOffest, int inputSize) {
 
 // }
 
-ComplexArray * BPSKReceiver::GetCurrentProcessingBuffer() {
+RealArray * BPSKReceiver::GetCurrentProcessingBuffer() {
     return CurrentProcessBuffer;
 }
 
-ComplexArray * BPSKReceiver::GetPreviousProcessingBuffer() {
+RealArray * BPSKReceiver::GetPreviousProcessingBuffer() {
     return PreviousProcessBuffer;
 }
 
-ComplexArray *BPSKReceiver::GetCurrentReceiveBuffer() {
+RealArray *BPSKReceiver::GetCurrentReceiveBuffer() {
     return ReceiveBuffer;
 }
 
-void BPSKReceiver::SetCurrentProcessingBuffer(ComplexArray *buffer) {
+void BPSKReceiver::SetCurrentProcessingBuffer(RealArray *buffer) {
     CurrentProcessBuffer = buffer;
 }
 
-void BPSKReceiver::SetPreviousProcessingBuffer(ComplexArray *buffer) {
+void BPSKReceiver::SetPreviousProcessingBuffer(RealArray *buffer) {
     PreviousProcessBuffer = buffer;
 }
 
-void BPSKReceiver::SetCurrentReceiveBuffer(ComplexArray *buffer) {
+void BPSKReceiver::SetCurrentReceiveBuffer(RealArray *buffer) {
     ReceiveBuffer = buffer;
 }
 
 void BPSKReceiver::SwapBuffers() {
-    ComplexArray *tmp;
+    RealArray *tmp;
     tmp = CurrentProcessBuffer;
     CurrentProcessBuffer = PreviousProcessBuffer;
     PreviousProcessBuffer = tmp;

@@ -9,7 +9,7 @@ SquarePreprocess::SquarePreprocess(float fs, float f0, int numOfTaps)
     fs = fs;
 
     filterTaps.LateInit(sizeof(taps) / sizeof(float));
-    filterTaps.SetBufferReal(taps, sizeof(taps) / sizeof(float));
+    filterTaps.SetBuffer(taps, sizeof(taps) / sizeof(float), 1);
     this->numOfTaps = numOfTaps;
     // double *taps_temp = new double[numOfTaps];
     // int numband = 3, type = BANDPASS, griddensity = 16;
@@ -54,8 +54,8 @@ SquarePreprocess::SquarePreprocess(float fs, float f0, int numOfTaps)
 
 }
 
-int SquarePreprocess::DoPreprocess(IConvolve *pConvolve, ComplexArray &input, ComplexArray &output) {
-    ComplexArray temp = input * input;
+int SquarePreprocess::DoPreprocess(IConvolve *pConvolve, RealArray &input, RealArray &output) {
+    RealArray temp = input * input;
     pConvolve->DoConvolve(temp, filterTaps, output);
     int offset = (filterSize - 1) / 2;
     for(int i = offset; i < output.GetElementSize() - offset; i++) {

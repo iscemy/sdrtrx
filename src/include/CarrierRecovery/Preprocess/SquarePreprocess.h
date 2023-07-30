@@ -1,11 +1,11 @@
-#include "Math/ComplexArray/ComplexArray.h"
+#include "Math/RealArray/RealArray.h"
 #include "Math/Convolve/IConvolve.h"
 
 class SquarePreprocess
 {
 private:
     /* data */
-    ComplexArray filterTaps;
+    RealArray filterTaps;
     int numOfTaps;
     static const int filterSize = 69;
     //TODO generate this filter on the go
@@ -80,7 +80,7 @@ private:
   0.002306997816493991};
 public:
     SquarePreprocess(float fs, float f0, int numOfTaps);
-    int DoPreprocess(IConvolve *pConvolve, ComplexArray &input, ComplexArray &output);
+    int DoPreprocess(IConvolve *pConvolve, RealArray &input, RealArray &output);
     int GetOutputSize(int InputSize);
     ~SquarePreprocess();
 };
