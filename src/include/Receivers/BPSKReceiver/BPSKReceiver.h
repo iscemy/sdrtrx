@@ -21,7 +21,7 @@ private:
     static const int receiveBufferSize = 1024 * 1024;
     
     int oversampleFactor = 30;
-    float receiverNoiseFloor = 20;
+    float receiverNoiseFloor = 10;
 
     static const int lowPassFilterSize = 19;
     float lowPassFilterTaps[lowPassFilterSize] = {

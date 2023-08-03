@@ -149,7 +149,7 @@ bool Pluto::cfg_ad9361_streaming_ch(struct stream_cfg *cfg, enum iodev type, int
 	wr_ch_lli(chn, "rf_bandwidth",       cfg->bw_hz);
 	wr_ch_lli(chn, "sampling_frequency", cfg->fs_hz);
 	wr_ch_float(chn, "hardwaregain", cfg->hwgain);
-
+    wr_ch_str(chn, "gain_control_mode", "manual");
 	// Configure LO channel
 	printf("* Acquiring AD9361 %s lo channel\n", type == TX ? "TX" : "RX");
 	if (!get_lo_chan(type, &chn)) { return false; }

@@ -47,8 +47,9 @@ int main(int, char**){
 #else
     #ifdef USE_HARDWARE
         Pluto *pluto = Pluto::GetInstance();
-        pluto->SetRxParameters(433.7e6, 1e6, 1e6, 10);
-        pluto->SetTxParameters(433.7e6, 1e6, 1e6, 10);
+        // pluto->SetRxParameters(433.7e6, 2e6, 1e6, 70);
+        pluto->SetRxParameters(2.495e9, 1e6, 1e6, 40);
+        pluto->SetTxParameters(2.495e9, 1e6, 1e6, 10);
         pluto->InitializeDevice();
         pRadio = pluto;
     #else

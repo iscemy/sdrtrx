@@ -26,7 +26,7 @@ BPSKReceiver::BPSKReceiver(IRadio *pRadio) {
 }
 
 void BPSKReceiver::mainThread() {
-    float fs = 1e6, f0 = 70e3;
+    float fs = 1e6, f0 = 140e3;
     float maxReceivedAbsVal, minReceivedAbsVal, recoveredFreqCoarse;
     int resultingSize;
     
@@ -138,12 +138,12 @@ void BPSKReceiver::mainThread() {
                     int bytes = sampler.RunAlgorithm(baseband, output, indices_baseband[i].first, indices_baseband[i].second - indices_baseband[i].first);
                     if(bytes > 0) {
                         // printf("birkac byte aldik hatasiz \n");
-                        // for(auto &received_byte : output) {
-                        //     printf("%x ", received_byte);
-                        // }
-                        // printf("\n"); 
+                        for(auto &received_byte : output) {
+                            printf("%x ", received_byte);
+                        }
+                        printf("\n"); 
                     } else {
-                        printf("ins paket kesildigindendir %f %d\n", recoveredFreqCoarse, indices_baseband[i].first);
+                        // printf("ins paket kesildigindendir %f %d\n", recoveredFreqCoarse, indices_baseband[i].first);
 
                         
                         // baseband.PrintContentsForPython();
@@ -181,8 +181,10 @@ void BPSKReceiver::checkIndicesForInvalidOnes(std::vector<std::pair<int,int>> in
 void BPSKReceiver::PrintCycleTime() {
     t1 = duration_cast< milliseconds >(system_clock::now().time_since_epoch());
     long long int tdiffms = (t1 - t0).count();
-    if(tdiffms > 8) {
-        // printf("tdiff %lldms \n", tdiffms);
+    static long long int max = 0;
+    if(max < tdiffms) {
+        printf("larger than max tdiff %lldms \n", tdiffms);
+        max = tdiffms;
     }
     
 }

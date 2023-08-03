@@ -1,5 +1,6 @@
 #include "Math/IFFT.h"
 #include "fftw3.h"
+#include "string.h"
 class FFTW : public IFFT
 {
 private:
